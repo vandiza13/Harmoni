@@ -1,0 +1,91 @@
+{
+  "name": "Harmoni — Manajemen Keluarga Modern",
+  "short_name": "Harmoni",
+  "description": "Platform manajemen keluarga lengkap untuk keluarga Indonesia",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#F9FBF8",
+  "theme_color": "#4CAF50",
+  "orientation": "portrait-primary",
+  "lang": "id",
+  "categories": ["finance", "lifestyle", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Dashboard Harmoni"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Catat Pengeluaran",
+      "short_name": "Pengeluaran",
+      "url": "/dashboard/keuangan?modal=expense",
+      "icons": [{ "src": "/icons/shortcut-expense.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Daftar Belanja",
+      "short_name": "Belanja",
+      "url": "/dashboard/belanja",
+      "icons": [{ "src": "/icons/shortcut-shopping.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Agenda Hari Ini",
+      "short_name": "Agenda",
+      "url": "/dashboard/agenda",
+      "icons": [{ "src": "/icons/shortcut-agenda.png", "sizes": "96x96" }]
+    }
+  ]
+}

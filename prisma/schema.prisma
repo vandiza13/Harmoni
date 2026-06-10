@@ -1,0 +1,742 @@
+// ============================================================
+// HARMONI — Family Management Platform
+// Prisma Schema v1.0
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// AUTH — NextAuth.js Required Models
+// ============================================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // null if using OAuth only
+  role          UserRole  @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  familyMembers FamilyMember[]
+  ownedFamilies Family[]        @relation("FamilyOwner")
+  notifications Notification[]
+  activityLogs  ActivityLog[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ============================================================
+// FAMILY — Core Workspace
+// ============================================================
+
+model Family {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  ownerId     String
+  inviteCode  String   @unique @default(cuid())
+  avatarUrl   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner          User            @relation("FamilyOwner", fields: [ownerId], references: [id])
+  members        FamilyMember[]
+  incomes        Income[]
+  expenses       Expense[]
+  categories     Category[]
+  budgets        Budget[]
+  bills          Bill[]
+  savingGoals    SavingGoal[]
+  emergencyFund  EmergencyFund?
+  debts          Debt[]
+  receivables    Receivable[]
+  inventory      Inventory[]
+  shoppingLists  ShoppingList[]
+  mealPlans      MealPlan[]
+  calendarEvents CalendarEvent[]
+  children       Child[]
+  documents      Document[]
+  notifications  Notification[]
+  activityLogs   ActivityLog[]
+
+  @@map("families")
+}
+
+model FamilyMember {
+  id        String     @id @default(cuid())
+  familyId  String
+  userId    String
+  role      FamilyRole @default(MEMBER)
+  nickname  String?
+  joinedAt  DateTime   @default(now())
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([familyId, userId])
+  @@map("family_members")
+}
+
+enum FamilyRole {
+  OWNER
+  ADMIN
+  MEMBER
+  CHILD
+}
+
+// ============================================================
+// CATEGORY — Shared across Income & Expense
+// ============================================================
+
+model Category {
+  id       String       @id @default(cuid())
+  familyId String
+  name     String
+  icon     String?      // emoji or icon name
+  color    String?      // hex color
+  type     CategoryType
+  isSystem Boolean      @default(false)
+
+  family   Family    @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  incomes  Income[]
+  expenses Expense[]
+  budgets  Budget[]
+
+  @@map("categories")
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+  BOTH
+}
+
+// ============================================================
+// FINANCE — Income & Expense
+// ============================================================
+
+model Income {
+  id          String   @id @default(cuid())
+  familyId    String
+  categoryId  String?
+  amount      Decimal  @db.Decimal(15, 2)
+  description String?
+  date        DateTime
+  receiptUrl  String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  family   Family    @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id])
+
+  @@index([familyId, date])
+  @@map("incomes")
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  familyId    String
+  categoryId  String?
+  amount      Decimal  @db.Decimal(15, 2)
+  description String?
+  date        DateTime
+  receiptUrl  String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  family   Family    @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id])
+
+  @@index([familyId, date])
+  @@map("expenses")
+}
+
+// ============================================================
+// BUDGET — Monthly budgeting per category
+// ============================================================
+
+model Budget {
+  id         String   @id @default(cuid())
+  familyId   String
+  categoryId String
+  amount     Decimal  @db.Decimal(15, 2)
+  month      Int      // 1–12
+  year       Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  family   Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@unique([familyId, categoryId, month, year])
+  @@index([familyId, year, month])
+  @@map("budgets")
+}
+
+// ============================================================
+// BILLS — Recurring bills with payment history
+// ============================================================
+
+model Bill {
+  id           String  @id @default(cuid())
+  familyId     String
+  name         String
+  amount       Decimal @db.Decimal(15, 2)
+  dueDay       Int     // day of month (1–31)
+  category     String?
+  isActive     Boolean @default(true)
+  reminderDays Int     @default(3) // days before due
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  family   Family        @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  payments BillPayment[]
+
+  @@map("bills")
+}
+
+model BillPayment {
+  id        String        @id @default(cuid())
+  billId    String
+  amount    Decimal       @db.Decimal(15, 2)
+  paidAt    DateTime
+  dueDate   DateTime
+  status    PaymentStatus @default(PAID)
+  note      String?
+  receiptUrl String?
+
+  bill Bill @relation(fields: [billId], references: [id], onDelete: Cascade)
+
+  @@map("bill_payments")
+}
+
+enum PaymentStatus {
+  PAID
+  PENDING
+  OVERDUE
+}
+
+// ============================================================
+// SAVINGS — Goals with contribution history
+// ============================================================
+
+model SavingGoal {
+  id            String    @id @default(cuid())
+  familyId      String
+  name          String
+  targetAmount  Decimal   @db.Decimal(15, 2)
+  currentAmount Decimal   @db.Decimal(15, 2) @default(0)
+  targetDate    DateTime?
+  description   String?
+  icon          String?
+  color         String?
+  isCompleted   Boolean   @default(false)
+  completedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  family        Family               @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  contributions SavingContribution[]
+
+  @@map("saving_goals")
+}
+
+model SavingContribution {
+  id           String   @id @default(cuid())
+  savingGoalId String
+  amount       Decimal  @db.Decimal(15, 2)
+  note         String?
+  date         DateTime @default(now())
+
+  savingGoal SavingGoal @relation(fields: [savingGoalId], references: [id], onDelete: Cascade)
+
+  @@map("saving_contributions")
+}
+
+// ============================================================
+// EMERGENCY FUND
+// ============================================================
+
+model EmergencyFund {
+  id            String   @id @default(cuid())
+  familyId      String   @unique
+  targetMonths  Int      @default(6)
+  currentAmount Decimal  @db.Decimal(15, 2) @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@map("emergency_funds")
+}
+
+// ============================================================
+// DEBT & RECEIVABLE
+// ============================================================
+
+model Debt {
+  id          String    @id @default(cuid())
+  familyId    String
+  creditor    String    // who we owe
+  amount      Decimal   @db.Decimal(15, 2) // total original
+  paidAmount  Decimal   @db.Decimal(15, 2) @default(0)
+  dueDate     DateTime?
+  description String?
+  isSettled   Boolean   @default(false)
+  settledAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  family   Family        @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  payments DebtPayment[]
+
+  @@map("debts")
+}
+
+model DebtPayment {
+  id     String   @id @default(cuid())
+  debtId String
+  amount Decimal  @db.Decimal(15, 2)
+  paidAt DateTime
+  note   String?
+
+  debt Debt @relation(fields: [debtId], references: [id], onDelete: Cascade)
+
+  @@map("debt_payments")
+}
+
+model Receivable {
+  id          String    @id @default(cuid())
+  familyId    String
+  debtor      String    // who owes us
+  amount      Decimal   @db.Decimal(15, 2)
+  paidAmount  Decimal   @db.Decimal(15, 2) @default(0)
+  dueDate     DateTime?
+  description String?
+  isSettled   Boolean   @default(false)
+  settledAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  family   Family              @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  payments ReceivablePayment[]
+
+  @@map("receivables")
+}
+
+model ReceivablePayment {
+  id           String   @id @default(cuid())
+  receivableId String
+  amount       Decimal  @db.Decimal(15, 2)
+  paidAt       DateTime
+  note         String?
+
+  receivable Receivable @relation(fields: [receivableId], references: [id], onDelete: Cascade)
+
+  @@map("receivable_payments")
+}
+
+// ============================================================
+// INVENTORY — Stok Dapur
+// ============================================================
+
+model Inventory {
+  id            String   @id @default(cuid())
+  familyId      String
+  name          String
+  category      String?  // beras, minyak, bumbu, dll
+  unit          String?  // kg, liter, pcs, dll
+  currentStock  Decimal  @db.Decimal(10, 3) @default(0)
+  minStock      Decimal  @db.Decimal(10, 3) @default(0)
+  imageUrl      String?
+  barcode       String?
+  location      String?  // e.g. "Kulkas", "Lemari"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  family        Family                 @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  transactions  InventoryTransaction[]
+  shoppingItems ShoppingItem[]
+
+  @@index([familyId])
+  @@map("inventories")
+}
+
+model InventoryTransaction {
+  id          String          @id @default(cuid())
+  inventoryId String
+  type        TransactionType
+  quantity    Decimal         @db.Decimal(10, 3)
+  note        String?
+  date        DateTime        @default(now())
+
+  inventory Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+
+  @@map("inventory_transactions")
+}
+
+enum TransactionType {
+  IN
+  OUT
+  ADJUSTMENT
+}
+
+// ============================================================
+// SHOPPING LIST
+// ============================================================
+
+model ShoppingList {
+  id          String   @id @default(cuid())
+  familyId    String
+  name        String
+  isActive    Boolean  @default(true)
+  isCompleted Boolean  @default(false)
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  family Family         @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  items  ShoppingItem[]
+
+  @@map("shopping_lists")
+}
+
+model ShoppingItem {
+  id             String    @id @default(cuid())
+  shoppingListId String
+  inventoryId    String?   // link to inventory if applicable
+  name           String
+  quantity       Decimal?  @db.Decimal(10, 3)
+  unit           String?
+  priority       Priority  @default(MEDIUM)
+  category       String?
+  isChecked      Boolean   @default(false)
+  price          Decimal?  @db.Decimal(15, 2)
+  note           String?
+
+  shoppingList ShoppingList @relation(fields: [shoppingListId], references: [id], onDelete: Cascade)
+  inventory    Inventory?   @relation(fields: [inventoryId], references: [id])
+
+  @@map("shopping_items")
+}
+
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+// ============================================================
+// MEAL PLANNER
+// ============================================================
+
+model MealPlan {
+  id        String   @id @default(cuid())
+  familyId  String
+  name      String?
+  weekStart DateTime // Monday of the week
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  family Family         @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  items  MealPlanItem[]
+
+  @@map("meal_plans")
+}
+
+model MealPlanItem {
+  id          String   @id @default(cuid())
+  mealPlanId  String
+  date        DateTime
+  mealType    MealType
+  menuName    String
+  ingredients Json?    // array of { name, quantity, unit }
+  recipe      String?  @db.Text
+  notes       String?
+
+  mealPlan MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+
+  @@map("meal_plan_items")
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+}
+
+// ============================================================
+// CALENDAR — Family Agenda
+// ============================================================
+
+model CalendarEvent {
+  id             String        @id @default(cuid())
+  familyId       String
+  title          String
+  description    String?
+  startDate      DateTime
+  endDate        DateTime?
+  allDay         Boolean       @default(false)
+  category       EventCategory @default(GENERAL)
+  color          String?
+  reminderMinutes Int?         // minutes before event
+  isRecurring    Boolean       @default(false)
+  recurrenceRule String?       // RRULE format
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([familyId, startDate])
+  @@map("calendar_events")
+}
+
+enum EventCategory {
+  GENERAL
+  SCHOOL
+  HEALTH
+  BIRTHDAY
+  APPOINTMENT
+  HOLIDAY
+  OTHER
+}
+
+// ============================================================
+// CHILDREN — Child tracking
+// ============================================================
+
+model Child {
+  id         String    @id @default(cuid())
+  familyId   String
+  name       String
+  birthDate  DateTime
+  gender     Gender?
+  photoUrl   String?
+  schoolName String?
+  grade      String?
+  notes      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  family        Family          @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  immunizations Immunization[]
+  growthRecords GrowthRecord[]
+  activities    ChildActivity[]
+
+  @@map("children")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+model Immunization {
+  id      String             @id @default(cuid())
+  childId String
+  name    String
+  date    DateTime?
+  nextDue DateTime?
+  status  ImmunizationStatus @default(PENDING)
+  location String?           // puskesmas/RS
+  note    String?
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@map("immunizations")
+}
+
+enum ImmunizationStatus {
+  PENDING
+  DONE
+  SKIPPED
+}
+
+model GrowthRecord {
+  id      String   @id @default(cuid())
+  childId String
+  date    DateTime
+  height  Decimal? @db.Decimal(5, 2) // cm
+  weight  Decimal? @db.Decimal(5, 2) // kg
+  headCircumference Decimal? @db.Decimal(5, 2) // cm
+  note    String?
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@map("growth_records")
+}
+
+model ChildActivity {
+  id          String   @id @default(cuid())
+  childId     String
+  title       String
+  description String?
+  date        DateTime
+  category    String?  // olahraga, les, dll
+  location    String?
+
+  child Child @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@map("child_activities")
+}
+
+// ============================================================
+// DOCUMENTS — Family document vault
+// ============================================================
+
+model Document {
+  id          String           @id @default(cuid())
+  familyId    String
+  name        String
+  category    DocumentCategory
+  fileUrl     String
+  fileSize    Int?             // bytes
+  mimeType    String?
+  expiryDate  DateTime?
+  description String?
+  tags        String[]         @default([])
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+enum DocumentCategory {
+  KTP
+  KK
+  BPJS
+  STNK
+  BPKB
+  CERTIFICATE
+  PASSPORT
+  INSURANCE
+  BIRTH_CERTIFICATE
+  MARRIAGE_CERTIFICATE
+  TAX
+  PROPERTY
+  EDUCATION
+  OTHER
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+model Notification {
+  id        String           @id @default(cuid())
+  familyId  String
+  userId    String?          // null = broadcast to whole family
+  title     String
+  message   String
+  type      NotificationType
+  isRead    Boolean          @default(false)
+  link      String?          // deeplink URL
+  metadata  Json?
+  createdAt DateTime         @default(now())
+
+  family Family  @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user   User?   @relation(fields: [userId], references: [id])
+
+  @@index([familyId, isRead])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  BILL_REMINDER
+  SAVING_UPDATE
+  BUDGET_WARNING
+  LOW_STOCK
+  DOCUMENT_EXPIRY
+  IMMUNIZATION_DUE
+  CALENDAR_REMINDER
+  DEBT_REMINDER
+  EMERGENCY_FUND
+  SYSTEM
+}
+
+// ============================================================
+// ACTIVITY LOG — Audit trail
+// ============================================================
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  familyId  String
+  userId    String
+  action    String   // CREATE, UPDATE, DELETE, VIEW
+  entity    String   // Income, Expense, Bill, etc.
+  entityId  String?
+  details   Json?    // before/after snapshot
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([familyId, createdAt])
+  @@index([userId, createdAt])
+  @@map("activity_logs")
+}
+
+enum UserRole {
+  USER
+  SUPERADMIN
+}

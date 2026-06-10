@@ -1,0 +1,221 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   HARMONI — Global Styles & Design Tokens
+   ============================================================ */
+
+@layer base {
+  :root {
+    /* ─── Brand Colors (HSL) ─────────────────────────────── */
+    --background: 210 40% 98%;    /* slate-50 */
+    --foreground: 222 47% 11%;    /* slate-900 */
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 142 76% 36%;       /* #16a34a - green-600 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 214 32% 91%;     /* slate-200 */
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96.1%;       /* slate-100 */
+    --muted-foreground: 215 16% 47%; /* slate-500 */
+
+    --accent: 33 100% 65%;        /* #FFB74D */
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84% 60%;     /* red-500 */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;        /* slate-200 */
+    --input: 214 32% 91%;
+    --ring: 123 43% 49%;
+
+    --radius: 0.75rem;            /* 12px — rounded corners */
+
+    /* ─── Success / Warning / Info ───────────────────────── */
+    --success: 122 39% 49%;
+    --warning: 38 100% 50%;
+    --info: 199 98% 38%;
+    --error: 3 80% 56%;
+  }
+
+  .dark {
+    /* Pure dark / Midnight zinc background */
+    --background: 240 10% 4%;     /* #09090b */
+    --foreground: 0 0% 98%;       /* #fafafa */
+
+    --card: 240 10% 6%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 10% 6%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Keep green primary but make it neon/vibrant */
+    --primary: 142 71% 45%;       /* #22c55e */
+    --primary-foreground: 144 100% 11%;
+
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 5% 65%;
+
+    --accent: 33 100% 50%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Subtle borders for dark mode */
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 142 71% 45%;
+  }
+
+  /* ─── Base reset ─────────────────────────────────────── */
+  * {
+    @apply border-border;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ─── Scrollbar ──────────────────────────────────────── */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+
+  /* ─── Focus ring (accessible) ────────────────────────── */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* ─── Touch targets ──────────────────────────────────── */
+  button, [role="button"], a, input, select, textarea {
+    min-height: 44px;
+  }
+
+  /* ─── Headings ───────────────────────────────────────── */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-plus-jakarta), sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  /* ─── Card variants ──────────────────────────────────── */
+  .card-harmoni {
+    @apply rounded-[1.25rem] bg-card text-card-foreground relative overflow-hidden transition-all duration-300 border border-border;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.04), 0 4px 10px rgba(0,0,0,0.02);
+  }
+  
+  .dark .card-harmoni {
+    /* Web3 glass style */
+    background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.0) 100%), hsl(var(--card));
+    border-color: rgba(255,255,255,0.08);
+    box-shadow: 0 4px 24px -4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03);
+  }
+  
+  .dark .card-harmoni:hover {
+    box-shadow: 0 8px 32px -4px rgba(34, 197, 94, 0.1), inset 0 1px 0 rgba(255,255,255,0.06);
+    border-color: rgba(34, 197, 94, 0.2);
+  }
+
+  /* ─── Gradient backgrounds ───────────────────────────── */
+  .gradient-primary {
+    background: linear-gradient(135deg, #4CAF50 0%, #81C784 100%);
+  }
+
+  .gradient-accent {
+    background: linear-gradient(135deg, #FFB74D 0%, #FFE082 100%);
+  }
+
+  .gradient-surface {
+    background: linear-gradient(180deg, #F9FBF8 0%, #FFFFFF 100%);
+  }
+
+  /* ─── Currency display ───────────────────────────────── */
+  .currency-display {
+    @apply font-display font-bold tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  /* ─── Loading skeleton ───────────────────────────────── */
+  .skeleton {
+    @apply animate-pulse bg-muted rounded-lg;
+  }
+
+  /* ─── Shimmer effect ─────────────────────────────────── */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 25%,
+      hsl(var(--muted-foreground) / 0.1) 50%,
+      hsl(var(--muted)) 75%
+    );
+    background-size: 200% 100%;
+    @apply animate-shimmer;
+  }
+
+  /* ─── Status badges ──────────────────────────────────── */
+  .badge-success {
+    @apply bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400;
+  }
+  .badge-warning {
+    @apply bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400;
+  }
+  .badge-error {
+    @apply bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400;
+  }
+  .badge-info {
+    @apply bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400;
+  }
+
+  /* ─── Bottom nav safe area ───────────────────────────── */
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  .pt-safe {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+}
+
+@layer utilities {
+  /* ─── Text gradient ──────────────────────────────────── */
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #4CAF50, #2E7D32);
+  }
+
+  /* ─── Hide scrollbar (keep scroll) ──────────────────── */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

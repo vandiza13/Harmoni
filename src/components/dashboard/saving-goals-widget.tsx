@@ -1,0 +1,1 @@
+export { SavingGoalsWidget } from "./index";
