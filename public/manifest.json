@@ -59,15 +59,7 @@
       "purpose": "maskable any"
     }
   ],
-  "screenshots": [
-    {
-      "src": "/screenshots/dashboard.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Dashboard Harmoni"
-    }
-  ],
+  "screenshots": [],
   "shortcuts": [
     {
       "name": "Catat Pengeluaran",
