@@ -7,7 +7,7 @@
   "display": "standalone",
   "display_override": ["standalone", "window-controls-overlay"],
   "background_color": "#F9FBF8",
-  "theme_color": "#4CAF50",
+  "theme_color": "#09090b",
   "orientation": "portrait-primary",
   "lang": "id",
   "categories": ["finance", "lifestyle", "productivity"],

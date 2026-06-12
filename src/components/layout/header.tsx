@@ -54,10 +54,10 @@ export function Header({ className }: HeaderProps) {
   };
 
   // Find current page title
-  const currentPage = NAV_ITEMS.flatMap((g) => g.items).find(
-    (item) =>
-      pathname === item.href || pathname.startsWith(item.href + "/")
-  );
+  const allNavItems = NAV_ITEMS.flatMap((g) => g.items);
+  const currentPage = [...allNavItems]
+    .sort((a, b) => b.href.length - a.href.length)
+    .find((item) => pathname === item.href || pathname.startsWith(item.href + "/"));
 
   return (
     <header

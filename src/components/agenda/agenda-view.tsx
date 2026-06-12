@@ -220,7 +220,7 @@ export function AgendaView({ initialEvents, selectedMonth, selectedYear }: Agend
   return (
     <div className="space-y-6">
       {/* ─── Header Action ───────────────────────────────── */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-foreground">📅 Agenda Keluarga</h2>
           <p className="text-sm text-muted-foreground">Sinkronisasikan jadwal dan agenda penting bersama keluarga</p>
