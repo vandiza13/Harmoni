@@ -89,6 +89,21 @@
     @apply bg-background text-foreground;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior-y: contain; /* Prevent pull-to-refresh & browser viewport bounce on mobile */
+  }
+
+  /* ─── PWA Native-like Interactive Optimizations ───────── */
+  a, img, button, [role="button"], svg {
+    -webkit-touch-callout: none; /* Disable context menu on long-press */
+  }
+
+  button, a, [role="button"], select, input[type="checkbox"], input[type="radio"], svg, img {
+    -webkit-user-select: none;
+    user-select: none; /* Disable text selection for interactive elements */
+  }
+
+  button, a, [role="button"], input, select, textarea {
+    touch-action: manipulation; /* Eliminate double-tap delay */
   }
 
   /* ─── Scrollbar ──────────────────────────────────────── */
