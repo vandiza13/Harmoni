@@ -95,7 +95,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className="min-h-screen bg-background font-sans antialiased relative flex flex-col">
+      <body className="min-h-screen bg-background font-sans antialiased relative flex flex-col overflow-x-hidden">
         {/* Ambient Dark Mode Mesh Gradient */}
         <div className="fixed inset-0 z-0 hidden dark:block overflow-hidden pointer-events-none">
           <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[120px]" />

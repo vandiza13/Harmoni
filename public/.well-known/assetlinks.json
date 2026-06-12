@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.vandiza.harmoni.twa",
+    "sha256_cert_fingerprints": ["B6:56:63:34:CA:DB:59:36:8B:F9:21:D8:3E:BA:30:4E:37:BE:0E:13:48:E1:C6:DE:C3:B7:FA:BC:7B:F3:FB:D6"]
+  }
+}]
