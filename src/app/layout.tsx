@@ -49,6 +49,14 @@ export const metadata: Metadata = {
     siteName: "Harmoni",
   },
   manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Harmoni",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   icons: {
     icon: [
       { url: "/icons/icon-32.png", sizes: "32x32", type: "image/png" },
@@ -65,6 +73,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#4CAF50" },
     { media: "(prefers-color-scheme: dark)", color: "#2E7D32" },
@@ -83,6 +92,7 @@ export default function RootLayout({
       className={`${inter.variable} ${plusJakarta.variable}`}
     >
       <head>
+        <meta name="mobile-web-app-capable" content="yes" />
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className="min-h-screen bg-background font-sans antialiased relative flex flex-col">

@@ -90,6 +90,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: contain; /* Prevent pull-to-refresh & browser viewport bounce on mobile */
+    -webkit-overflow-scrolling: touch; /* Momentum scrolling on iOS */
   }
 
   /* ─── PWA Native-like Interactive Optimizations ───────── */
@@ -232,5 +233,16 @@
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* ─── Native-like Horizontal Scroll ─────────────────── */
+  .horizontal-scroll-container {
+    @apply flex overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-inline: 1rem;
+  }
+  
+  .horizontal-scroll-item {
+    @apply snap-center shrink-0;
   }
 }

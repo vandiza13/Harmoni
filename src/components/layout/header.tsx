@@ -34,9 +34,17 @@ export function Header({ className }: HeaderProps) {
   const pathname = usePathname();
   const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const user = session?.user as {
@@ -54,14 +62,18 @@ export function Header({ className }: HeaderProps) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 flex h-16 items-center gap-4",
-        "bg-background/60 px-4 backdrop-blur-2xl md:px-6",
+        "sticky top-0 z-30 flex items-center gap-2 md:gap-4 transition-all duration-200",
+        "bg-background/80 px-4 pt-safe backdrop-blur-2xl md:px-6",
+        isScrolled ? "border-b border-border shadow-sm h-14 md:h-16" : "h-16 md:h-20",
         className
       )}
     >
-      {/* ─── Page title (mobile hidden on sm, shown md+) ── */}
-      <div className="flex-1 min-w-0">
-        <h1 className="text-lg font-bold text-foreground truncate">
+      {/* ─── Page title (native large title style) ── */}
+      <div className="flex-1 min-w-0 transition-all duration-200">
+        <h1 className={cn(
+          "font-bold text-foreground truncate transition-all duration-200",
+          isScrolled ? "text-lg" : "text-xl md:text-2xl"
+        )}>
           {currentPage?.label || "Dashboard"}
         </h1>
         <p className="text-xs text-muted-foreground truncate hidden sm:block">
@@ -87,12 +99,12 @@ export function Header({ className }: HeaderProps) {
         {/* Quick add */}
         <QuickAddMenu />
 
-        {/* Theme Toggle */}
+        {/* Theme Toggle (hidden on mobile, move to settings) */}
         {mounted && (
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 text-muted-foreground"
+            className="hidden md:flex h-9 w-9 text-muted-foreground"
             onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
           >
             {resolvedTheme === "dark" ? (
@@ -107,10 +119,10 @@ export function Header({ className }: HeaderProps) {
         {/* Notifications */}
         <NotificationBell />
 
-        {/* Avatar Dropdown (desktop only) */}
+        {/* Avatar Dropdown (mobile & desktop) */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="h-8 w-8 hidden lg:flex items-center justify-center rounded-full focus:outline-none select-none hover:opacity-90 active:scale-95 transition-all">
+            <button className="h-8 w-8 flex items-center justify-center rounded-full focus:outline-none select-none hover:opacity-90 active:scale-95 transition-all">
               <Avatar className="h-8 w-8 cursor-pointer">
                 <AvatarImage src={user?.image ?? undefined} />
                 <AvatarFallback className="gradient-primary text-white text-xs font-semibold">

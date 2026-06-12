@@ -180,39 +180,49 @@ export default async function DashboardPage() {
       />
 
       {/* ─── Stat cards ───────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard
-          title="Pemasukan"
-          value={formatIDR(data.totalIncome, { compact: true })}
-          icon={TrendingUp}
-          iconColor="text-green-600"
-          iconBg="bg-green-100 dark:bg-green-900/30"
-          trend={"+5% vs bulan lalu"}
-          trendUp
-        />
-        <StatCard
-          title="Pengeluaran"
-          value={formatIDR(data.totalExpense, { compact: true })}
-          icon={TrendingDown}
-          iconColor="text-red-500"
-          iconBg="bg-red-100 dark:bg-red-900/30"
-          trend={"-2% vs bulan lalu"}
-          trendUp={false}
-        />
-        <StatCard
-          title="Tabungan"
-          value={`${data.savingGoals.length} target`}
-          icon={Bird}
-          iconColor="text-primary"
-          iconBg="bg-primary/10"
-        />
-        <StatCard
-          title="Anggaran"
-          value={`${data.budgets.filter((b) => b.percentage < 80).length}/${data.budgets.length} aman`}
-          icon={Wallet}
-          iconColor="text-blue-500"
-          iconBg="bg-blue-100 dark:bg-blue-900/30"
-        />
+      <div className="-mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="horizontal-scroll-container sm:grid sm:grid-cols-4 sm:gap-3">
+          <div className="horizontal-scroll-item w-[160px] sm:w-auto">
+            <StatCard
+              title="Pemasukan"
+              value={formatIDR(data.totalIncome, { compact: true })}
+              icon={TrendingUp}
+              iconColor="text-green-600"
+              iconBg="bg-green-100 dark:bg-green-900/30"
+              trend={"+5% vs bulan lalu"}
+              trendUp
+            />
+          </div>
+          <div className="horizontal-scroll-item w-[160px] sm:w-auto">
+            <StatCard
+              title="Pengeluaran"
+              value={formatIDR(data.totalExpense, { compact: true })}
+              icon={TrendingDown}
+              iconColor="text-red-500"
+              iconBg="bg-red-100 dark:bg-red-900/30"
+              trend={"-2% vs bulan lalu"}
+              trendUp={false}
+            />
+          </div>
+          <div className="horizontal-scroll-item w-[140px] sm:w-auto">
+            <StatCard
+              title="Tabungan"
+              value={`${data.savingGoals.length} target`}
+              icon={Bird}
+              iconColor="text-primary"
+              iconBg="bg-primary/10"
+            />
+          </div>
+          <div className="horizontal-scroll-item w-[140px] sm:w-auto">
+            <StatCard
+              title="Anggaran"
+              value={`${data.budgets.filter((b) => b.percentage < 80).length}/${data.budgets.length} aman`}
+              icon={Wallet}
+              iconColor="text-blue-500"
+              iconBg="bg-blue-100 dark:bg-blue-900/30"
+            />
+          </div>
+        </div>
       </div>
 
       {/* ─── Main grid ────────────────────────────────────── */}

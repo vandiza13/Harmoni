@@ -19,13 +19,21 @@ import {
   FileText,
   BarChart3,
   ChevronRight,
+  Settings,
+  LogOut,
   type LucideIcon,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export interface NavItem {
   label: string;
@@ -229,27 +237,47 @@ export function Sidebar({ className }: SidebarProps) {
 
       {/* ─── User section ─────────────────────────────── */}
       <div className="p-3 mt-auto">
-        <div
-          className={cn(
-            "flex items-center gap-3 rounded-xl p-2.5",
-            "min-h-[56px]"
-          )}
-        >
-          <Avatar className="h-9 w-9 shrink-0">
-            <AvatarImage src={user?.image ?? undefined} />
-            <AvatarFallback className="gradient-primary text-white text-xs font-semibold">
-              {getInitials(user?.name || user?.email || "U")}
-            </AvatarFallback>
-          </Avatar>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-foreground">
-              {user?.name || "Pengguna"}
-            </p>
-            <p className="truncate text-xs text-muted-foreground">
-              {(user as { familyName?: string })?.familyName || "Keluarga Saya"}
-            </p>
-          </div>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className={cn(
+                "flex w-full items-center gap-3 rounded-xl p-2.5 hover:bg-muted/50 transition-colors text-left",
+                "min-h-[56px] focus:outline-none select-none active:scale-[0.98]"
+              )}
+            >
+              <Avatar className="h-9 w-9 shrink-0">
+                <AvatarImage src={user?.image ?? undefined} />
+                <AvatarFallback className="gradient-primary text-white text-xs font-semibold">
+                  {getInitials(user?.name || user?.email || "U")}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-foreground">
+                  {user?.name || "Pengguna"}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {(user as { familyName?: string })?.familyName || "Keluarga Saya"}
+                </p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 rotate-90" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" side="top" className="w-56 mb-2 rounded-xl border border-border bg-card text-card-foreground shadow-md">
+            <DropdownMenuItem asChild className="gap-2 cursor-pointer">
+              <Link href="/dashboard/pengaturan">
+                <Settings className="h-4 w-4 text-muted-foreground" />
+                <span>Pengaturan</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="gap-2 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/5"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Keluar</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </aside>
   );

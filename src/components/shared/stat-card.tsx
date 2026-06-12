@@ -25,7 +25,7 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "card-harmoni p-4 flex flex-col gap-3",
+        "card-harmoni p-4 flex flex-col gap-3 transition-transform active:scale-[0.98]",
         className
       )}
     >

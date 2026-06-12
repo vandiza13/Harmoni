@@ -5,6 +5,7 @@
   "description": "Platform manajemen keluarga lengkap untuk keluarga Indonesia",
   "start_url": "/dashboard",
   "display": "standalone",
+  "display_override": ["standalone", "window-controls-overlay"],
   "background_color": "#F9FBF8",
   "theme_color": "#4CAF50",
   "orientation": "portrait-primary",
